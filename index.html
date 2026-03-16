@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>東京 · 紙誌 · 旅行助手</title>
+  <title>Maggie’s First Solo Trip｜東京紙誌 🎀🩰</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,13 +13,14 @@
 
   <style>
     :root{
-      --paper:#F4F1EA;
-      --paper-deep:#EAE4D8;
+      --paper:#F6F1EE;
+      --paper-deep:#ECE3DE;
       --ink:#242424;
-      --muted:#7E7A72;
+      --muted:#827B76;
       --line:rgba(0,0,0,0.08);
-      --accent:#B65E3C;
-      --card:#FFFCF7;
+      --accent:#C77C93;
+      --accent-deep:#B8657F;
+      --card:#FFFCFA;
     }
 
     *{ box-sizing:border-box; }
@@ -52,7 +53,7 @@
 
     .page{
       display:none;
-      animation: fade .35s ease;
+      animation: fade .32s ease;
     }
 
     .page.active{
@@ -68,7 +69,7 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      background: rgba(244,241,234,0.88);
+      background: rgba(246,241,238,0.88);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--line);
     }
@@ -100,13 +101,13 @@
     }
 
     .section-pad{
-      padding: 26px 22px 32px;
+      padding: 26px 22px 34px;
     }
 
     .hero-card,
     .info-card,
     .editorial-card{
-      background: rgba(255,252,247,0.88);
+      background: rgba(255,252,250,0.92);
       border:1px solid rgba(0,0,0,0.05);
       box-shadow: 0 8px 30px rgba(0,0,0,0.04);
     }
@@ -119,7 +120,6 @@
     .editorial-card{
       border-radius: 22px;
       overflow:hidden;
-      cursor:pointer;
       transition: transform .2s ease, box-shadow .2s ease;
     }
 
@@ -135,13 +135,11 @@
       text-transform:uppercase;
     }
 
-    .paper-line{
-      border-top:1px solid var(--line);
-    }
-
     .soft-btn,
     .solid-btn,
-    .ghost-btn{
+    .ghost-btn,
+    .mini-btn,
+    .date-chip{
       border:none;
       cursor:pointer;
       transition:.2s ease;
@@ -179,12 +177,51 @@
       font-size:13px;
     }
 
+    .mini-btn{
+      background: rgba(0,0,0,0.05);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+    }
+
+    .mini-btn:hover{
+      background: rgba(0,0,0,0.08);
+    }
+
+    .mini-btn.delete{
+      background: rgba(199,124,147,0.14);
+      color: var(--accent-deep);
+    }
+
+    .mini-btn.delete:hover{
+      background: rgba(199,124,147,0.22);
+    }
+
+    .date-chip{
+      white-space: nowrap;
+      background: rgba(0,0,0,0.04);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    .date-chip.active{
+      background: var(--ink);
+      color: #fff;
+    }
+
     .cover-img{
       width:100%;
       aspect-ratio: 16 / 9;
       object-fit: cover;
       display:block;
-      filter: saturate(0.88) contrast(1.02);
+      filter: saturate(0.9) contrast(1.02);
     }
 
     .cover-img-tall{
@@ -199,7 +236,7 @@
       font-size:10px;
       letter-spacing:.18em;
       text-transform:uppercase;
-      color:var(--accent);
+      color:var(--accent-deep);
       font-weight:700;
     }
 
@@ -321,6 +358,8 @@
       gap:14px;
     }
 
+    .muted{ color:var(--muted); }
+
     @media (min-width: 640px){
       .passport-grid{
         grid-template-columns: 1fr 1fr;
@@ -329,9 +368,6 @@
         padding: 34px 30px 40px;
       }
     }
-
-    .muted{ color:var(--muted); }
-    .hidden{ display:none !important; }
   </style>
 </head>
 <body>
@@ -341,7 +377,7 @@
       <div class="max-w-3xl mx-auto flex items-center justify-between gap-4">
         <div class="py-4">
           <div class="eyebrow">Tokyo Paper Guide</div>
-          <div class="serif text-lg">東京 · 紙誌 · 旅行助手</div>
+          <div class="serif text-lg">Maggie’s First Solo Trip｜東京紙誌 🎀🩰</div>
         </div>
         <nav class="flex items-center gap-5">
           <button class="nav-link active" id="nav-home" onclick="switchTab('home')">HOME</button>
@@ -362,7 +398,7 @@
             <div>
               <div class="eyebrow mb-2">Today’s Weather</div>
               <div class="serif text-6xl sm:text-7xl tracking-tight">
-                <span id="weather-temp">18</span><span class="text-[#B65E3C]">°</span>
+                <span id="weather-temp">18</span><span class="text-[#C77C93]">°</span>
               </div>
             </div>
             <div class="text-right text-xs sm:text-sm leading-6 font-medium">
@@ -373,9 +409,9 @@
 
           <div class="pt-6">
             <div class="tag mb-3">Today’s Highlight</div>
-            <h2 class="serif text-2xl sm:text-3xl mb-2">新宿高空考察</h2>
+            <h2 class="serif text-2xl sm:text-3xl mb-2">第一次一個人出發</h2>
             <p class="muted leading-7 text-sm sm:text-base">
-              在玻璃帷幕與光影交錯之間，挑一個視野最乾淨的角落，把這座城市的速度記進今天的頁邊空白。
+              這次不是和誰並肩，而是自己替旅程決定節奏。東京很大，但你終於可以只對自己的心情負責。
             </p>
           </div>
         </div>
@@ -387,15 +423,15 @@
             <div class="space-y-3 text-sm leading-7">
               <div>
                 <div class="font-semibold mb-1">飯店日文地址</div>
-                <div id="hotel-jp" class="muted">東京都新宿區西新宿 1-1-1</div>
+                <div class="muted">東京都新宿區西新宿 1-1-1</div>
               </div>
               <div>
                 <div class="font-semibold mb-1">飯店英文地址</div>
-                <div id="hotel-en" class="muted">1-1-1 Nishi-Shinjuku, Shinjuku-ku, Tokyo</div>
+                <div class="muted">1-1-1 Nishi-Shinjuku, Shinjuku-ku, Tokyo</div>
               </div>
               <div>
                 <div class="font-semibold mb-1">緊急聯絡</div>
-                <div id="emergency-phone" class="muted">110（警察） / 119（消防、救護）</div>
+                <div class="muted">110（警察） / 119（消防、救護）</div>
               </div>
             </div>
           </div>
@@ -405,14 +441,6 @@
             <div class="serif text-xl mb-4">旅途備忘</div>
             <textarea id="quick-note" class="textarea" placeholder="例如：租車取車時間、停車場入口、飯店 check-in 提醒"></textarea>
           </div>
-        </div>
-
-        <div class="info-card rounded-2xl p-5">
-          <div class="eyebrow mb-3">Travel Mood</div>
-          <div class="serif text-2xl mb-3">今日起筆</div>
-          <p class="muted leading-7 text-sm sm:text-base">
-            這不是一個冷冰冰的工具頁，而是一本文字先行的現地手札。你要記下的，不只是哪裡好吃，而是你為什麼想把今天留住。
-          </p>
         </div>
       </section>
     </main>
@@ -428,55 +456,9 @@
           <button class="soft-btn" onclick="openAddSheet()">+ ADD</button>
         </div>
 
-        <div id="itinerary-list" class="space-y-6">
-          <article class="editorial-card" onclick="viewDetailByData({
-            name:'敘敘苑燒肉 新宿住友店',
-            type:'Dining',
-            day:'Day 1',
-            image:'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80',
-            desc:'把晚餐安排在高樓層，不只是為了吃肉，更像是為了替第一天的東京落下一個乾淨俐落的句點。窗外是密集的光點，桌上是節奏準確的炭火，兩者一起構成這座城市最擅長的秩序感。',
-            menu:[
-              { zh:'上等牛舌', jp:'上タン塩' },
-              { zh:'壺漬小排', jp:'壺漬けカルビ' },
-              { zh:'綜合拼盤', jp:'盛り合わせ' }
-            ],
-            mapQuery:'敘敘苑燒肉 新宿住友店'
-          })">
-            <img class="cover-img" src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80" alt="敘敘苑">
-            <div class="p-5 sm:p-6">
-              <div class="flex items-center justify-between gap-4 mb-3">
-                <div class="tag">Dining</div>
-                <div class="eyebrow">Day 1</div>
-              </div>
-              <h3 class="serif text-2xl mb-2">敘敘苑燒肉 新宿住友店</h3>
-              <p class="muted text-sm leading-7">高空夜景、炭火、牛舌，適合把東京的第一個夜晚寫得比較像電影。</p>
-            </div>
-          </article>
+        <div id="date-tabs" class="flex gap-3 overflow-x-auto pb-3 mb-8"></div>
 
-          <article class="editorial-card" onclick="viewDetailByData({
-            name:'東京車站丸之內口',
-            type:'Walk',
-            day:'Day 1',
-            image:'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80',
-            desc:'若想把東京的現代感與舊時代輪廓放在同一個畫面裡，丸之內口總是很適合起筆。車流與磚牆並列，像兩種語氣平靜地共存。',
-            menu:[
-              { zh:'經典散步路線', jp:'定番散策ルート' },
-              { zh:'夜間拍照點', jp:'夜景スポット' },
-              { zh:'周邊咖啡店', jp:'周辺カフェ' }
-            ],
-            mapQuery:'東京車站 丸之內口'
-          })">
-            <img class="cover-img" src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80" alt="東京車站">
-            <div class="p-5 sm:p-6">
-              <div class="flex items-center justify-between gap-4 mb-3">
-                <div class="tag">Walk</div>
-                <div class="eyebrow">Day 1</div>
-              </div>
-              <h3 class="serif text-2xl mb-2">東京車站丸之內口</h3>
-              <p class="muted text-sm leading-7">適合留一點空白慢慢走，讓城市自己把節奏交給你。</p>
-            </div>
-          </article>
-        </div>
+        <div id="itinerary-list" class="space-y-6"></div>
       </section>
     </main>
 
@@ -557,14 +539,14 @@
     <div id="detail-menu" class="info-card rounded-2xl p-4"></div>
   </section>
 
-  <!-- add sheet -->
+  <!-- add/edit sheet -->
   <section id="add-sheet" class="bottom-sheet" aria-hidden="true">
     <div class="drag-bar"></div>
 
     <div class="flex items-start justify-between gap-4 mb-6">
       <div>
-        <div class="eyebrow mb-2">AI Style Generator</div>
-        <h3 class="serif text-3xl">新增目的地</h3>
+        <div class="eyebrow mb-2" id="sheet-mode-label">AI Style Generator</div>
+        <h3 class="serif text-3xl" id="sheet-title">新增目的地</h3>
       </div>
       <button class="ghost-btn text-2xl" onclick="closeSheets()">&times;</button>
     </div>
@@ -581,8 +563,13 @@
       </div>
 
       <div>
-        <label class="eyebrow block mb-2">天數標記</label>
-        <input id="in-day" class="small-input" type="text" placeholder="例如：Day 2">
+        <label class="eyebrow block mb-2">顯示標記</label>
+        <input id="in-day" class="small-input" type="text" placeholder="例如：Day 2 / Morning">
+      </div>
+
+      <div>
+        <label class="eyebrow block mb-2">日期</label>
+        <input id="in-date" class="small-input" type="date">
       </div>
 
       <div>
@@ -591,13 +578,19 @@
       </div>
 
       <div class="pt-3">
-        <button class="solid-btn w-full" style="width:100%;" onclick="aiGen()">AI GENERATE GUIDE</button>
+        <button class="solid-btn w-full" style="width:100%;" id="sheet-submit-btn" onclick="saveItem()">SAVE PLAN</button>
       </div>
     </div>
   </section>
 
   <script>
+    const STORAGE_KEY_ITINERARY = 'maggie_tokyo_itinerary_v2';
+    const STORAGE_KEY_NOTE = 'maggie_tokyo_quick_note_v1';
+
     let currentMapQuery = '';
+    let selectedDate = '';
+    let editingId = null;
+
     let budgetItems = [
       { name: '敘敘苑（預約金）', jpy: 10000 },
       { name: 'Suica 儲值', jpy: 2500 }
@@ -610,6 +603,84 @@
       'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1200&q=80'
     ];
 
+    const defaultItinerary = [
+      {
+        id: createId(),
+        name: '敘敘苑燒肉 新宿住友店',
+        type: 'Dining',
+        day: 'Day 1',
+        date: '2026-05-12',
+        image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80',
+        desc: '把晚餐安排在高樓層，不只是為了吃肉，更像是為了替第一天的東京落下一個乾淨俐落的句點。窗外是密集的光點，桌上是節奏準確的炭火，兩者一起構成這座城市最擅長的秩序感。',
+        menu: [
+          { zh:'上等牛舌', jp:'上タン塩' },
+          { zh:'壺漬小排', jp:'壺漬けカルビ' },
+          { zh:'綜合拼盤', jp:'盛り合わせ' }
+        ],
+        mapQuery: '敘敘苑燒肉 新宿住友店'
+      },
+      {
+        id: createId(),
+        name: '東京車站丸之內口',
+        type: 'Walk',
+        day: 'Day 1',
+        date: '2026-05-12',
+        image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80',
+        desc: '若想把東京的現代感與舊時代輪廓放在同一個畫面裡，丸之內口總是很適合起筆。車流與磚牆並列，像兩種語氣平靜地共存。',
+        menu: [
+          { zh:'經典散步路線', jp:'定番散策ルート' },
+          { zh:'夜間拍照點', jp:'夜景スポット' },
+          { zh:'周邊咖啡店', jp:'周辺カフェ' }
+        ],
+        mapQuery: '東京車站 丸之內口'
+      },
+      {
+        id: createId(),
+        name: '淺草寺',
+        type: 'Temple',
+        day: 'Day 2',
+        date: '2026-05-13',
+        image: 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=1200&q=80',
+        desc: '走進淺草寺時，東京會忽然慢下來一點。人聲、木紋、風聲與空地的留白，讓這座城市不只剩下速度，也保留了能夠安靜對視的深度。',
+        menu: [
+          { zh:'御守', jp:'お守り' },
+          { zh:'御朱印', jp:'御朱印' },
+          { zh:'參拜路線', jp:'参拝ルート' }
+        ],
+        mapQuery: '淺草寺'
+      }
+    ];
+
+    let itineraryItems = loadItinerary();
+
+    function createId() {
+      return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function loadItinerary() {
+      const saved = localStorage.getItem(STORAGE_KEY_ITINERARY);
+      if (!saved) return defaultItinerary;
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) && parsed.length ? parsed : defaultItinerary;
+      } catch {
+        return defaultItinerary;
+      }
+    }
+
+    function saveItinerary() {
+      localStorage.setItem(STORAGE_KEY_ITINERARY, JSON.stringify(itineraryItems));
+    }
+
     function switchTab(tab) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('page-' + tab).classList.add('active');
@@ -621,6 +692,32 @@
     }
 
     function openAddSheet() {
+      editingId = null;
+      resetForm();
+      document.getElementById('sheet-mode-label').textContent = 'AI Style Generator';
+      document.getElementById('sheet-title').textContent = '新增目的地';
+      document.getElementById('sheet-submit-btn').textContent = 'SAVE PLAN';
+
+      document.getElementById('overlay').classList.add('active');
+      document.getElementById('add-sheet').classList.add('active');
+      document.getElementById('detail-sheet').classList.remove('active');
+    }
+
+    function openEditSheet(id) {
+      const item = itineraryItems.find(x => x.id === id);
+      if (!item) return;
+
+      editingId = id;
+      document.getElementById('in-name').value = item.name || '';
+      document.getElementById('in-type').value = item.type || '';
+      document.getElementById('in-day').value = item.day || '';
+      document.getElementById('in-date').value = item.date || '';
+      document.getElementById('in-image').value = item.image || '';
+
+      document.getElementById('sheet-mode-label').textContent = 'Edit Mode';
+      document.getElementById('sheet-title').textContent = '編輯行程';
+      document.getElementById('sheet-submit-btn').textContent = 'UPDATE PLAN';
+
       document.getElementById('overlay').classList.add('active');
       document.getElementById('add-sheet').classList.add('active');
       document.getElementById('detail-sheet').classList.remove('active');
@@ -636,6 +733,14 @@
       document.getElementById('overlay').classList.remove('active');
       document.getElementById('detail-sheet').classList.remove('active');
       document.getElementById('add-sheet').classList.remove('active');
+    }
+
+    function resetForm() {
+      document.getElementById('in-name').value = '';
+      document.getElementById('in-type').value = '';
+      document.getElementById('in-day').value = '';
+      document.getElementById('in-date').value = '';
+      document.getElementById('in-image').value = '';
     }
 
     function openMap() {
@@ -695,6 +800,57 @@
       ];
     }
 
+    function formatDateLabel(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr + 'T00:00:00');
+      const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      return `${d.getMonth() + 1}/${d.getDate()} ${weekdays[d.getDay()]}`;
+    }
+
+    function getUniqueDates() {
+      return [...new Set(itineraryItems.map(item => item.date).filter(Boolean))].sort();
+    }
+
+    function ensureSelectedDate() {
+      const dates = getUniqueDates();
+      if (!dates.length) {
+        selectedDate = '';
+        return;
+      }
+      if (!selectedDate || !dates.includes(selectedDate)) {
+        selectedDate = dates[0];
+      }
+    }
+
+    function renderDateTabs() {
+      const wrap = document.getElementById('date-tabs');
+      wrap.innerHTML = '';
+
+      const dates = getUniqueDates();
+      ensureSelectedDate();
+
+      if (!dates.length) {
+        wrap.innerHTML = `
+          <div class="info-card rounded-2xl p-4 w-full">
+            <div class="muted text-sm">目前還沒有任何日期行程，先新增一筆吧。</div>
+          </div>
+        `;
+        return;
+      }
+
+      dates.forEach(date => {
+        const btn = document.createElement('button');
+        btn.className = 'date-chip' + (date === selectedDate ? ' active' : '');
+        btn.textContent = formatDateLabel(date);
+        btn.onclick = function() {
+          selectedDate = date;
+          renderDateTabs();
+          renderItinerary();
+        };
+        wrap.appendChild(btn);
+      });
+    }
+
     function viewDetailByData(data) {
       document.getElementById('detail-type').textContent = data.type || 'Spot';
       document.getElementById('detail-title').textContent = data.name || '未命名';
@@ -719,10 +875,85 @@
       openDetailSheet();
     }
 
-    function aiGen() {
+    function renderItinerary() {
+      const list = document.getElementById('itinerary-list');
+      list.innerHTML = '';
+      ensureSelectedDate();
+
+      if (!selectedDate) {
+        list.innerHTML = `
+          <div class="info-card rounded-2xl p-6">
+            <div class="eyebrow mb-2">No Plan Yet</div>
+            <p class="muted">還沒有任何行程，先按右下角新增。</p>
+          </div>
+        `;
+        return;
+      }
+
+      const filtered = itineraryItems
+        .filter(item => item.date === selectedDate)
+        .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
+
+      if (!filtered.length) {
+        list.innerHTML = `
+          <div class="info-card rounded-2xl p-6">
+            <div class="eyebrow mb-2">No Plan Yet</div>
+            <p class="muted">這一天還沒有安排任何行程。</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(data => {
+        const card = document.createElement('article');
+        card.className = 'editorial-card';
+        card.innerHTML = `
+          <img class="cover-img" src="${escapeHtml(data.image || fallbackImages[0])}" alt="${escapeHtml(data.name)}">
+          <div class="p-5 sm:p-6">
+            <div class="flex items-center justify-between gap-4 mb-3">
+              <div class="tag">${escapeHtml(data.type || 'Spot')}</div>
+              <div class="eyebrow">${escapeHtml(data.day || '')}</div>
+            </div>
+
+            <h3 class="serif text-2xl mb-2">${escapeHtml(data.name)}</h3>
+            <p class="muted text-sm leading-7 mb-5">${escapeHtml(data.desc || '')}</p>
+
+            <div class="flex flex-wrap gap-2">
+              <button class="mini-btn" data-action="detail" data-id="${data.id}">DETAIL</button>
+              <button class="mini-btn" data-action="edit" data-id="${data.id}">EDIT</button>
+              <button class="mini-btn delete" data-action="delete" data-id="${data.id}">DELETE</button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('[data-action="detail"]').onclick = function(e) {
+          e.stopPropagation();
+          viewDetailByData(data);
+        };
+
+        card.querySelector('[data-action="edit"]').onclick = function(e) {
+          e.stopPropagation();
+          openEditSheet(data.id);
+        };
+
+        card.querySelector('[data-action="delete"]').onclick = function(e) {
+          e.stopPropagation();
+          deleteItem(data.id);
+        };
+
+        card.querySelector('img').onclick = function() {
+          viewDetailByData(data);
+        };
+
+        list.appendChild(card);
+      });
+    }
+
+    function saveItem() {
       const name = document.getElementById('in-name').value.trim();
       const type = document.getElementById('in-type').value.trim() || 'Spot';
-      const day = document.getElementById('in-day').value.trim() || 'New';
+      const day = document.getElementById('in-day').value.trim() || 'Plan';
+      const date = document.getElementById('in-date').value;
       const image = document.getElementById('in-image').value.trim() || fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
 
       if (!name) {
@@ -730,57 +961,64 @@
         return;
       }
 
+      if (!date) {
+        alert('請選擇日期');
+        return;
+      }
+
       const desc = createPoeticDesc(name, type);
       const menu = createMenu(name, type);
 
-      const data = {
-        name,
-        type,
-        day,
-        image,
-        desc,
-        menu,
-        mapQuery: name
-      };
+      if (editingId) {
+        const index = itineraryItems.findIndex(x => x.id === editingId);
+        if (index === -1) return;
 
-      const list = document.getElementById('itinerary-list');
-      const card = document.createElement('article');
-      card.className = 'editorial-card';
+        itineraryItems[index] = {
+          ...itineraryItems[index],
+          name,
+          type,
+          day,
+          date,
+          image,
+          desc,
+          menu,
+          mapQuery: name
+        };
+      } else {
+        itineraryItems.unshift({
+          id: createId(),
+          name,
+          type,
+          day,
+          date,
+          image,
+          desc,
+          menu,
+          mapQuery: name
+        });
+      }
 
-      card.onclick = function() {
-        viewDetailByData(data);
-      };
-
-      card.innerHTML = `
-        <img class="cover-img" src="${image}" alt="${name}">
-        <div class="p-5 sm:p-6">
-          <div class="flex items-center justify-between gap-4 mb-3">
-            <div class="tag">${escapeHtml(type)}</div>
-            <div class="eyebrow">${escapeHtml(day)}</div>
-          </div>
-          <h3 class="serif text-2xl mb-2">${escapeHtml(name)}</h3>
-          <p class="muted text-sm leading-7">${escapeHtml(desc)}</p>
-        </div>
-      `;
-
-      list.prepend(card);
-
-      document.getElementById('in-name').value = '';
-      document.getElementById('in-type').value = '';
-      document.getElementById('in-day').value = '';
-      document.getElementById('in-image').value = '';
-
+      selectedDate = date;
+      saveItinerary();
+      renderDateTabs();
+      renderItinerary();
       closeSheets();
+      resetForm();
+      editingId = null;
       switchTab('plan');
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+    function deleteItem(id) {
+      const item = itineraryItems.find(x => x.id === id);
+      if (!item) return;
+
+      const ok = confirm(`要刪除「${item.name}」嗎？`);
+      if (!ok) return;
+
+      itineraryItems = itineraryItems.filter(x => x.id !== id);
+      saveItinerary();
+      renderDateTabs();
+      renderItinerary();
     }
 
     function renderBudget() {
@@ -838,8 +1076,21 @@
       el.textContent = formatter.format(now);
     }
 
+    function initNote() {
+      const textarea = document.getElementById('quick-note');
+      const saved = localStorage.getItem(STORAGE_KEY_NOTE);
+      if (saved) textarea.value = saved;
+
+      textarea.addEventListener('input', function() {
+        localStorage.setItem(STORAGE_KEY_NOTE, textarea.value);
+      });
+    }
+
     initDate();
+    initNote();
     renderBudget();
+    renderDateTabs();
+    renderItinerary();
   </script>
 </body>
 </html>
