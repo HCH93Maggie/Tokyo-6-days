@@ -3,64 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>東京極簡旅遊助手</title>
+    <title>東京自駕 · 高級考察團</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Noto Serif TC', 'serif'],
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
     <style>
-        :root { --jp-red: #D63031; --jp-beige: #F8F4ED; }
-        body { background-color: var(--jp-beige); color: #2C3E50; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
-        .tag { font-size: 10px; padding: 2px 10px; border-radius: 99px; font-weight: bold; margin-right: 5px; }
-        .nav-active { color: var(--jp-red); }
+        body { background-color: #F6F6F6; color: #1A1A1A; -webkit-tap-highlight-color: transparent; }
+        .serif-title { font-family: 'Noto Serif TC', serif; font-weight: 900; letter-spacing: -0.05em; }
+        .pwa-card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); overflow: hidden; }
+        /* 底部導航 */
+        .nav-bar { background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); }
+        .nav-item { color: #A0A0A0; font-size: 10px; font-weight: bold; text-align: center; }
+        .nav-item.active { color: #D63031; }
     </style>
 </head>
-<body class="pb-28">
-    <div class="p-6 bg-white rounded-b-[40px] shadow-sm mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-black italic">TOKYO 6D5N</h1>
-            <p class="text-xs text-gray-400 font-mono mt-1">2026.03.16 START</p>
-        </div>
-        <div class="text-right">
-            <p class="text-2xl">☀️</p>
-            <p class="text-xs font-bold">東京 18°C</p>
-        </div>
-    </div>
+<body class="pb-32 font-sans">
 
-    <div class="px-6" id="itinerary">
-        <div class="mb-4 text-xs font-black text-gray-400 tracking-tighter uppercase">Day 1: 抵達與新宿</div>
+    <div class="px-8 pt-10 pb-6 bg-white rounded-b-[32px] mb-6">
+        <p class="text-xs text-gray-400 tracking-widest text-center font-bold">FAMILY TRIP</p>
+        <h1 class="serif-title text-4xl text-center mt-2">東京旅行 <span class="text-xs font-mono px-2 py-0.5 border border-gray-200 rounded-full text-gray-400 align-middle">2026</span></h1>
         
-        <div class="card border-l-4 border-blue-400">
-            <div class="flex justify-between items-start mb-2">
-                <span class="tag bg-blue-50 text-blue-600">🚃 交通</span>
-                <span class="text-xs text-gray-400 font-mono">14:00</span>
+        <div class="flex justify-between items-end mt-8">
+            <div class="text-left">
+                <p class="text-[10px] text-gray-400">SAT</p>
+                <p class="serif-title text-5xl relative">14<span class="text-red-500 absolute -bottom-1 -left-1">.</span></p>
             </div>
-            <h3 class="text-lg font-bold">成田特快 N'EX</h3>
-            <p class="text-sm text-gray-500 mt-1">成田機場直達新宿，請對號入座。</p>
-            <a href="https://www.google.com/maps/search/Narita+Airport" class="mt-4 block text-center py-3 bg-gray-900 text-white rounded-xl text-xs font-bold shadow-md">📍 導航至機場車站</a>
-        </div>
-
-        <div class="card border-l-4 border-orange-400">
-            <div class="flex justify-between items-start mb-2">
-                <span class="tag bg-orange-50 text-orange-600">🍴 餐廳</span>
-                <span class="text-xs text-gray-400 font-mono">19:00</span>
+            <div class="text-right">
+                <span class="text-3xl">☀️</span>
+                <p class="text-xs font-bold mt-1">18°C / 12°C</p>
             </div>
-            <h3 class="text-lg font-bold">敘敘苑燒肉 - 新宿歌舞伎町店</h3>
-            <div class="mt-2 flex flex-wrap gap-y-2">
-                <span class="tag bg-red-100 text-red-600">必吃美食</span>
-                <span class="tag bg-yellow-100 text-yellow-700">必點：上等牛舌</span>
-            </div>
-            <p class="text-sm text-gray-500 mt-3 bg-gray-50 p-3 rounded-lg leading-relaxed">
-                💡 **導遊攻略**：敘敘苑晚間價格較高，但新宿店的高樓景觀極美。如果還沒預約，可以請飯店櫃檯代撥電話確認。
-            </p>
-            <a href="https://www.google.com/maps/search/叙々苑+新宿" class="mt-4 block text-center py-3 bg-gray-900 text-white rounded-xl text-xs font-bold">📍 啟動導航</a>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-100 flex justify-around py-5 pb-8 z-50">
-        <div class="flex flex-col items-center nav-active"><i class="fa-solid fa-calendar-day text-xl"></i><span class="text-[10px] mt-1 font-bold">行程</span></div>
-        <div class="flex flex-col items-center text-gray-300"><i class="fa-solid fa-lightbulb text-xl"></i><span class="text-[10px] mt-1">推薦</span></div>
-        <div class="flex flex-col items-center text-gray-300"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px] mt-1">記帳</span></div>
-        <div class="flex flex-col items-center text-gray-300" onclick="alert('緊急聯絡：110(警), 119(消)')"><i class="fa-solid fa-phone text-xl"></i><span class="text-[10px] mt-1">緊急</span></div>
+    <div class="px-5 space-y-6">
+
+        <div class="pwa-card relative aspect-[16/9]">
+            <img src="https://images.unsplash.com/photo-1590759668628-05b0fc34b139?q=80&w=800" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-5 flex flex-col justify-end">
+                <div class="flex items-center gap-2 text-white/70 text-xs">
+                    <span class="px-2 py-0.5 border border-white/30 rounded text-[9px]">DAY 1</span>
+                    <i class="fa-solid fa-location-dot"></i> 熊本市
+                </div>
+                <h2 class="serif-title text-2xl text-white mt-2">加藤清正的熊本城</h2>
+            </div>
+        </div>
+
+        <div class="pwa-card p-6">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+                <span class="text-[11px] font-bold px-3 py-1 bg-red-50 text-red-600 rounded-full">🍴 FOOD</span>
+                <div class="text-right text-sm font-bold text-gray-800"><i class="fa-regular fa-clock mr-1"></i> 19:00</div>
+            </div>
+            
+            <h2 class="serif-title text-2xl mb-1">敘敘苑燒肉 (新宿店)</h2>
+            <p class="text-xs text-gray-400 mb-6"><i class="fa-solid fa-location-dot mr-1"></i> 東京都新宿区歌舞伎町...</p>
+            
+            <div class="space-y-3 mb-8">
+                <p class="text-[11px] font-bold text-gray-400 tracking-wider">指差し会話 (POINT & SPEAK)</p>
+                <div class="p-4 bg-gray-50 rounded-xl flex justify-between text-sm">
+                    <span class="text-gray-900 font-medium">上等牛舌拼盤</span>
+                    <span class="text-gray-500 font-serif">上タン塩焼</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl flex justify-between text-sm">
+                    <span class="text-gray-900 font-medium">壺漬韓式小排</span>
+                    <span class="text-gray-500 font-serif">壺漬カルビ焼</span>
+                </div>
+            </div>
+
+            <a href="http://googleusercontent.com/maps.google.com/9" class="w-full flex items-center justify-center gap-3 py-4 bg-white border border-gray-200 rounded-2xl text-sm font-bold text-gray-800 shadow-sm active:bg-gray-50">
+                <i class="fa-regular fa-paper-plane text-gray-400"></i>
+                <span class="text-xs text-gray-400">CAR GPS PHONE</span>
+                03-5360-8689
+            </a>
+        </div>
+
+        <div class="p-6 bg-white/50 rounded-2xl border border-gray-100 text-sm text-gray-600 space-y-3 leading-relaxed">
+            <p class="text-[11px] font-bold text-gray-400 tracking-wider">關於此處 (ABOUT)</p>
+            <p><span class="font-bold text-gray-900">【預約困難】</span> 敘敘苑新宿店擁有極佳的高樓夜景，建議提前請飯店櫃檯代為預約靠窗座位。</p>
+            <p><span class="font-bold text-gray-900">【故事】</span> 敘敘苑以其標準化的高品質服務與穩定肉質著稱，是許多人來到日本燒肉的初體驗。</p>
+        </div>
+
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 p-4 pb-8 nav-bar border-t border-gray-100 flex justify-around items-center z-50">
+        <div class="nav-item active"><i class="fa-solid fa-map text-lg"></i><p class="mt-1.5">行程</p></div>
+        <div class="nav-item"><i class="fa-regular fa-lightbulb text-lg"></i><p class="mt-1.5">推薦</p></div>
+        <div class="nav-item"><i class="fa-solid fa-receipt text-lg"></i><p class="mt-1.5">記帳</p></div>
+        <div class="nav-item"><i class="fa-regular fa-circle-question text-lg"></i><p class="mt-1.5">資訊</p></div>
     </nav>
 </body>
 </html>
