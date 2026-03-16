@@ -279,7 +279,7 @@
 
           <div class="panel">
             <div class="eyebrow mb-3">住宿資訊</div>
-            <div class="serif text-3xl leading-tight mb-3">The Blossom Kumamoto</div>
+            <div class="serif text-3xl leading-tight mb-3">APA Hotel Ueno Ekimae</div>
             <div class="text-sm text-gray-500 leading-7">
               建議在 app 內把住宿地址、電話、入住資訊整理成筆記，方便現地快速查閱。
             </div>
@@ -519,76 +519,7 @@
       'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1200&q=80'
     ];
 
-    const defaultItinerary = [
-      {
-        id: createId(),
-        category: 'transport',
-        name: '出發（JX846）',
-        type: 'Flight',
-        day: 'Day 1',
-        date: '2026-03-14',
-        time: '07:30',
-        address: '台北桃園機場 TPE',
-        phone: '',
-        image: fallbackImages[0],
-        note: '此行程為航班出發時間，建議事先確認報到櫃檯、登機門、行李規定與實際起飛時間。',
-        desc: '此行程為航班出發時間，建議事先確認報到櫃檯、登機門、行李規定與實際起飛時間。',
-        menu: [],
-        mapQuery: '台北桃園機場'
-      },
-      {
-        id: createId(),
-        category: 'transport',
-        name: '取車（Toyota Rent a Car）',
-        type: 'Transport',
-        day: '預約資訊',
-        date: '2026-03-14',
-        time: '11:30',
-        address: '熊本県菊池郡菊陽町大字辛川403-2',
-        phone: '096-232-0100',
-        image: fallbackImages[2],
-        note: '此行程為取車安排。建議事先確認預約編號、取車地點、接駁方式、保險內容與還車時間。',
-        desc: '此行程為取車安排。建議事先確認預約編號、取車地點、接駁方式、保險內容與還車時間。',
-        menu: [],
-        mapQuery: 'Toyota Rent a Car 熊本'
-      },
-      {
-        id: createId(),
-        category: 'restaurant',
-        name: '午餐：魚飯時（sahanji）',
-        type: 'Food',
-        day: '午餐',
-        date: '2026-03-14',
-        time: '13:00',
-        address: '熊本市中央区細工町2-14',
-        phone: '096-356-0382',
-        image: fallbackImages[1],
-        note: 'Sahanji 位於熊本市中央區細工町，主打海鮮御膳與刺身料理，為熊本市區常見的海鮮用餐地點。建議事先確認營業時間、是否接受預約，以及當日供應內容。',
-        desc: 'Sahanji 位於熊本市中央區細工町，主打海鮮御膳與刺身料理，為熊本市區常見的海鮮用餐地點。建議事先確認營業時間、是否接受預約，以及當日供應內容。',
-        menu: [
-          { zh: '海鮮豪華御膳', jp: '海鮮贅沢御膳' },
-          { zh: '荒炊魚頭', jp: '荒炊き' },
-          { zh: '生魚片', jp: '刺身' }
-        ],
-        mapQuery: '魚飯時 sahanji 熊本'
-      },
-      {
-        id: createId(),
-        category: 'spot',
-        name: '熊本城 天守閣',
-        type: 'Sightseeing',
-        day: '下午',
-        date: '2026-03-14',
-        time: '13:45',
-        address: '熊本県熊本市中央区本丸1-1',
-        phone: '096-352-5900',
-        image: fallbackImages[3],
-        note: '熊本城位於熊本市中央區，為日本代表性城郭之一。現場可安排天守閣與周邊城跡參觀，建議事先確認開放時間、停車位置與步行動線。',
-        desc: '熊本城位於熊本市中央區，為日本代表性城郭之一。現場可安排天守閣與周邊城跡參觀，建議事先確認開放時間、停車位置與步行動線。',
-        menu: [],
-        mapQuery: '熊本城 天守閣'
-      }
-    ];
+    const defaultItinerary = [ ];
 
     const defaultBudgetItems = [
       { id: createId(), name: '午餐', jpy: 3200 },
