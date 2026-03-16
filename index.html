@@ -498,639 +498,601 @@
     </div>
   </div>
 
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    getDocs,
-    addDoc,
-    updateDoc,
-    deleteDoc,
-    doc,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  <script>
+    const STORAGE_KEY_ITINERARY = 'maggie_trip_itinerary_v10';
+    const STORAGE_KEY_BUDGET = 'maggie_trip_budget_v10';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCrbG3xh3PhlgSYdNQbVuH_e37HsCNTxfU",
-    authDomain: "tokyo-6-days.firebaseapp.com",
-    projectId: "tokyo-6-days",
-    storageBucket: "tokyo-6-days.firebasestorage.app",
-    messagingSenderId: "105321880680",
-    appId: "1:105321880680:web:4b7b10cefcfc5ef6f8efdd",
-    measurementId: "G-G4RBQTDN3R"
-  };
+    let selectedDate = '';
+    let editingId = null;
+    let editingBudgetId = null;
+    let currentMapQuery = '';
+    let currentDetailId = null;
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  const itineraryCol = collection(db, "itineraries");
-  const budgetCol = collection(db, "budgets");
-
-  let selectedDate = "";
-  let editingId = null;
-  let editingBudgetId = null;
-  let currentMapQuery = "";
-  let currentDetailId = null;
-
-  let itineraryItems = [];
-  let budgetItems = [];
-
-  const fallbackImages = [
-    "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1200&q=80"
-  ];
-
-  const defaultBudgetItems = [
-    { name: "午餐", jpy: 3200 },
-    { name: "停車費", jpy: 800 }
-  ];
-
-  function escapeHtml(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function getDocId(item) {
-    return item.id || item._id || "";
-  }
-
-  function toggleCategoryFields() {
-    const category = document.getElementById("in-category").value;
-    document.getElementById("restaurant-menu-wrap").style.display =
-      category === "restaurant" ? "block" : "none";
-  }
-
-  function openAddSheet() {
-    editingId = null;
-    resetForm();
-    document.getElementById("sheet-mode-label").textContent = "Plan Editor";
-    document.getElementById("sheet-title").textContent = "新增行程";
-    document.getElementById("sheet-submit-btn").textContent = "SAVE PLAN";
-    document.getElementById("overlay").classList.add("active");
-    document.getElementById("add-sheet").classList.add("active");
-    document.getElementById("detail-sheet").classList.remove("active");
-  }
-
-  function openEditSheet(id) {
-    const item = itineraryItems.find(x => getDocId(x) === id);
-    if (!item) return;
-
-    editingId = id;
-    document.getElementById("in-category").value = item.category || "spot";
-    document.getElementById("in-name").value = item.name || "";
-    document.getElementById("in-type").value = item.type || "";
-    document.getElementById("in-day").value = item.day || "";
-    document.getElementById("in-date").value = item.date || "";
-    document.getElementById("in-time").value = item.time || "";
-    document.getElementById("in-address").value = item.address || "";
-    document.getElementById("in-phone").value = item.phone || "";
-    document.getElementById("in-image").value = item.image || "";
-    document.getElementById("in-note").value = item.note || "";
-    document.getElementById("in-menu").value = (item.menu || [])
-      .map(m => `${m.zh} / ${m.jp}`)
-      .join("\n");
-
-    document.getElementById("sheet-mode-label").textContent = "Edit In App";
-    document.getElementById("sheet-title").textContent = "在 app 內編輯行程";
-    document.getElementById("sheet-submit-btn").textContent = "UPDATE PLAN";
-
-    toggleCategoryFields();
-    document.getElementById("overlay").classList.add("active");
-    document.getElementById("add-sheet").classList.add("active");
-    document.getElementById("detail-sheet").classList.remove("active");
-  }
-
-  function closeSheets() {
-    document.getElementById("overlay").classList.remove("active");
-    document.getElementById("detail-sheet").classList.remove("active");
-    document.getElementById("add-sheet").classList.remove("active");
-  }
-
-  function openLargeCard(text) {
-    document.getElementById("large-card-title").textContent = text || "";
-    document.getElementById("large-card-overlay").classList.add("active");
-  }
-
-  function closeLargeCard() {
-    document.getElementById("large-card-overlay").classList.remove("active");
-  }
-
-  function parseMenuText(text) {
-    if (!text.trim()) return [];
-    return text
-      .split("\n")
-      .map(line => line.trim())
-      .filter(Boolean)
-      .map(line => {
-        const parts = line.split("/");
-        return {
-          zh: (parts[0] || "").trim(),
-          jp: (parts[1] || "").trim()
-        };
-      });
-  }
-
-  function createInfoDesc(name, type, category, note) {
-    if (note && note.trim()) return note.trim();
-
-    const typeText = (type || "").toLowerCase();
-
-    if (category === "restaurant") {
-      return `${name} 為用餐地點，可列入當日餐廳安排。建議事先確認營業時間、訂位規則、低消與供餐形式。`;
+    function createId() {
+      return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
     }
-    if (category === "transport" || typeText.includes("transport") || typeText.includes("flight")) {
-      return `${name} 為交通相關行程，建議事先確認集合地點、營業或報到時間、聯絡方式與取件或搭乘規則。`;
+
+    const fallbackImages = [
+      'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1200&q=80'
+    ];
+
+    const defaultItinerary = [ ];
+
+    const defaultBudgetItems = [
+      { id: createId(), name: '午餐', jpy: 3200 },
+      { id: createId(), name: '停車費', jpy: 800 }
+    ];
+
+    let itineraryItems = loadItinerary();
+    let budgetItems = loadBudget();
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
     }
-    if (typeText.includes("sightseeing") || typeText.includes("spot") || category === "spot") {
-      return `${name} 為景點行程，建議事先確認開放時間、停留時間、周邊交通與現場動線。`;
+
+    function loadItinerary() {
+      const saved = localStorage.getItem(STORAGE_KEY_ITINERARY);
+      if (!saved) return defaultItinerary;
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) && parsed.length ? parsed : defaultItinerary;
+      } catch {
+        return defaultItinerary;
+      }
     }
-    return `${name} 為當日行程地點，建議事先確認地址、聯絡方式與時間安排。`;
-  }
 
-  function formatDateParts(dateStr) {
-    const d = new Date(dateStr + "T00:00:00");
-    const weekdays = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
-    return {
-      dow: weekdays[d.getDay()],
-      dm: `${d.getDate()}`,
-      md: `${d.getMonth() + 1}/${d.getDate()}`
-    };
-  }
-
-  function getUniqueDates() {
-    return [...new Set(itineraryItems.map(item => item.date).filter(Boolean))].sort();
-  }
-
-  function ensureSelectedDate() {
-    const dates = getUniqueDates();
-    if (!dates.length) {
-      selectedDate = "";
-      return;
+    function saveItinerary() {
+      localStorage.setItem(STORAGE_KEY_ITINERARY, JSON.stringify(itineraryItems));
     }
-    if (!selectedDate || !dates.includes(selectedDate)) {
-      selectedDate = dates[0];
+
+    function loadBudget() {
+      const saved = localStorage.getItem(STORAGE_KEY_BUDGET);
+      if (!saved) return defaultBudgetItems;
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) && parsed.length ? parsed : defaultBudgetItems;
+      } catch {
+        return defaultBudgetItems;
+      }
     }
-  }
 
-  function renderDateStripInto(targetId) {
-    const wrap = document.getElementById(targetId);
-    if (!wrap) return;
-    wrap.innerHTML = "";
-    const dates = getUniqueDates();
-    ensureSelectedDate();
+    function saveBudget() {
+      localStorage.setItem(STORAGE_KEY_BUDGET, JSON.stringify(budgetItems));
+    }
 
-    dates.forEach(date => {
-      const parts = formatDateParts(date);
-      const btn = document.createElement("button");
-      btn.className = "date-item" + (date === selectedDate ? " active" : "");
-      btn.innerHTML = `
-        <div class="dow">${parts.dow}</div>
-        <div class="dm">${parts.dm}</div>
-        <div class="dot"></div>
-      `;
-      btn.onclick = function() {
-        selectedDate = date;
-        renderHome();
+    function switchTab(tab) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + tab).classList.add('active');
+      document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+      document.getElementById('nav-' + tab).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (tab === 'home') renderHome();
+      if (tab === 'plan') {
         renderDateTabs();
         renderItinerary();
-      };
-      wrap.appendChild(btn);
-    });
-  }
-
-  function renderDateTabs() {
-    renderDateStripInto("date-tabs");
-  }
-
-  function getCategoryClass(category) {
-    if (category === "restaurant") return "restaurant";
-    if (category === "transport") return "transport";
-    return "spot";
-  }
-
-  function renderHome() {
-    ensureSelectedDate();
-    renderDateStripInto("home-date-strip");
-
-    const sameDay = itineraryItems
-      .filter(item => item.date === selectedDate)
-      .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
-
-    const firstSpot = sameDay.find(x => x.category === "spot") || sameDay[0];
-    const highlight = document.getElementById("home-highlight");
-    const preview = document.getElementById("home-preview-list");
-
-    if (!sameDay.length) {
-      highlight.innerHTML = `<div class="text-gray-500 text-sm">這一天還沒有行程，請直接在 app 裡新增。</div>`;
-      preview.innerHTML = "";
-      return;
+      }
+      if (tab === 'budget') renderBudget();
     }
 
-    highlight.innerHTML = `
-      <img src="${escapeHtml(firstSpot.image || fallbackImages[0])}" class="hero-image mb-4" alt="">
-      <div class="flex items-center justify-between gap-3 mb-2">
-        <div class="tag-badge">${escapeHtml(firstSpot.type || "PLAN")}</div>
-        <div class="text-sm text-gray-500">${escapeHtml(firstSpot.address || "")}</div>
-      </div>
-      <div class="serif text-4xl leading-tight mb-2">${escapeHtml(firstSpot.name)}</div>
-      <div class="text-gray-600 text-sm leading-7">${escapeHtml(firstSpot.desc || "")}</div>
-    `;
-
-    preview.innerHTML = "";
-    sameDay.slice(0, 4).forEach(item => {
-      const row = document.createElement("div");
-      row.className = "budget-row";
-      row.innerHTML = `
-        <div>
-          <div class="serif text-3xl">${escapeHtml(item.time || "--:--")}</div>
-          <div class="eyebrow mt-2">${escapeHtml(item.type || "")}</div>
-        </div>
-        <div class="flex-1">
-          <div class="font-semibold text-lg mb-1">${escapeHtml(item.name)}</div>
-          <div class="text-gray-500 text-sm">${escapeHtml(item.address || "")}</div>
-        </div>
-      `;
-      preview.appendChild(row);
-    });
-  }
-
-  function renderItinerary() {
-    const list = document.getElementById("itinerary-list");
-    list.innerHTML = "";
-    ensureSelectedDate();
-
-    if (!selectedDate) {
-      list.innerHTML = `
-        <div class="panel">
-          <div class="eyebrow mb-2">No Plan Yet</div>
-          <div class="text-gray-500 text-sm">目前沒有任何行程，請直接在 app 裡新增。</div>
-        </div>
-      `;
-      return;
+    function toggleCategoryFields() {
+      const category = document.getElementById('in-category').value;
+      document.getElementById('restaurant-menu-wrap').style.display = category === 'restaurant' ? 'block' : 'none';
     }
 
-    const filtered = itineraryItems
-      .filter(item => item.date === selectedDate)
-      .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
-
-    if (!filtered.length) {
-      list.innerHTML = `
-        <div class="panel">
-          <div class="eyebrow mb-2">No Plan Yet</div>
-          <div class="text-gray-500 text-sm">這一天還沒有任何行程，請直接在 app 裡新增。</div>
-        </div>
-      `;
-      return;
+    function openAddSheet() {
+      editingId = null;
+      resetForm();
+      document.getElementById('sheet-mode-label').textContent = 'Plan Editor';
+      document.getElementById('sheet-title').textContent = '新增行程';
+      document.getElementById('sheet-submit-btn').textContent = 'SAVE PLAN';
+      document.getElementById('overlay').classList.add('active');
+      document.getElementById('add-sheet').classList.add('active');
+      document.getElementById('detail-sheet').classList.remove('active');
     }
 
-    filtered.forEach(item => {
-      const row = document.createElement("div");
-      row.className = "timeline-row";
-      row.innerHTML = `
-        <div class="timeline-time">${escapeHtml(item.time || "--:--")}</div>
-        <div class="timeline-line"></div>
-        <div class="timeline-card ${getCategoryClass(item.category)}">
-          <div class="label">${escapeHtml(item.type || "Plan")}</div>
-          <div class="serif text-3xl leading-tight mb-2">${escapeHtml(item.name)}</div>
-          <div class="text-gray-500 text-sm leading-7 mb-4">${escapeHtml(item.desc || "")}</div>
-          <div class="flex flex-wrap gap-2">
-            <button class="mini-btn" data-action="detail">DETAIL</button>
-            <button class="mini-btn" data-action="edit">EDIT IN APP</button>
-            <button class="mini-btn delete" data-action="delete">DELETE IN APP</button>
-          </div>
-        </div>
-      `;
+    function openEditSheet(id) {
+      const item = itineraryItems.find(x => x.id === id);
+      if (!item) return;
 
-      row.querySelector('[data-action="detail"]').onclick = function() {
-        viewDetailByData(item);
+      editingId = id;
+      document.getElementById('in-category').value = item.category || 'spot';
+      document.getElementById('in-name').value = item.name || '';
+      document.getElementById('in-type').value = item.type || '';
+      document.getElementById('in-day').value = item.day || '';
+      document.getElementById('in-date').value = item.date || '';
+      document.getElementById('in-time').value = item.time || '';
+      document.getElementById('in-address').value = item.address || '';
+      document.getElementById('in-phone').value = item.phone || '';
+      document.getElementById('in-image').value = item.image || '';
+      document.getElementById('in-note').value = item.note || '';
+      document.getElementById('in-menu').value = (item.menu || []).map(m => `${m.zh} / ${m.jp}`).join('\n');
+
+      document.getElementById('sheet-mode-label').textContent = 'Edit In App';
+      document.getElementById('sheet-title').textContent = '在 app 內編輯行程';
+      document.getElementById('sheet-submit-btn').textContent = 'UPDATE PLAN';
+
+      toggleCategoryFields();
+      document.getElementById('overlay').classList.add('active');
+      document.getElementById('add-sheet').classList.add('active');
+      document.getElementById('detail-sheet').classList.remove('active');
+    }
+
+    function closeSheets() {
+      document.getElementById('overlay').classList.remove('active');
+      document.getElementById('detail-sheet').classList.remove('active');
+      document.getElementById('add-sheet').classList.remove('active');
+    }
+
+    function openLargeCard(text) {
+      document.getElementById('large-card-title').textContent = text || '';
+      document.getElementById('large-card-overlay').classList.add('active');
+    }
+
+    function closeLargeCard() {
+      document.getElementById('large-card-overlay').classList.remove('active');
+    }
+
+    function parseMenuText(text) {
+      if (!text.trim()) return [];
+      return text
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const parts = line.split('/');
+          return {
+            zh: (parts[0] || '').trim(),
+            jp: (parts[1] || '').trim()
+          };
+        });
+    }
+
+    function createInfoDesc(name, type, category, note) {
+      if (note && note.trim()) return note.trim();
+
+      const typeText = (type || '').toLowerCase();
+
+      if (category === 'restaurant') {
+        return `${name} 為用餐地點，可列入當日餐廳安排。建議事先確認營業時間、訂位規則、低消與供餐形式。`;
+      }
+      if (category === 'transport' || typeText.includes('transport') || typeText.includes('flight')) {
+        return `${name} 為交通相關行程，建議事先確認集合地點、營業或報到時間、聯絡方式與取件或搭乘規則。`;
+      }
+      if (typeText.includes('sightseeing') || typeText.includes('spot') || category === 'spot') {
+        return `${name} 為景點行程，建議事先確認開放時間、停留時間、周邊交通與現場動線。`;
+      }
+      return `${name} 為當日行程地點，建議事先確認地址、聯絡方式與時間安排。`;
+    }
+
+    function formatDateParts(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const weekdays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+      return {
+        dow: weekdays[d.getDay()],
+        dm: `${d.getDate()}`,
+        md: `${d.getMonth() + 1}/${d.getDate()}`
       };
-      row.querySelector('[data-action="edit"]').onclick = function() {
-        openEditSheet(getDocId(item));
-      };
-      row.querySelector('[data-action="delete"]').onclick = function() {
-        deleteItem(getDocId(item));
-      };
+    }
 
-      list.appendChild(row);
-    });
-  }
+    function getUniqueDates() {
+      return [...new Set(itineraryItems.map(item => item.date).filter(Boolean))].sort();
+    }
 
-  function viewDetailByData(item) {
-    currentDetailId = getDocId(item);
-    currentMapQuery = item.address || item.mapQuery || item.name || "";
+    function ensureSelectedDate() {
+      const dates = getUniqueDates();
+      if (!dates.length) {
+        selectedDate = '';
+        return;
+      }
+      if (!selectedDate || !dates.includes(selectedDate)) selectedDate = dates[0];
+    }
 
-    const badge = document.getElementById("detail-type-badge");
-    badge.textContent = (item.type || "PLAN").toUpperCase();
-    badge.style.color = item.category === "restaurant"
-      ? "#B56F82"
-      : item.category === "transport"
-      ? "#6C7FA6"
-      : "#708D79";
+    function renderDateStripInto(targetId) {
+      const wrap = document.getElementById(targetId);
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      const dates = getUniqueDates();
+      ensureSelectedDate();
 
-    document.getElementById("detail-time").textContent = item.time || "--:--";
-    document.getElementById("detail-title").textContent = item.name || "";
-    document.getElementById("detail-address").textContent = item.address || "未填寫地址";
-    document.getElementById("detail-phone").textContent = item.phone || "未填寫";
-    document.getElementById("detail-about").textContent = item.desc || "目前沒有說明，可直接在 app 裡編輯補上。";
-
-    const menuWrap = document.getElementById("detail-menu");
-    const pointWrap = document.getElementById("point-speak-wrap");
-    menuWrap.innerHTML = "";
-
-    if (item.category === "restaurant" && item.menu && item.menu.length) {
-      pointWrap.style.display = "block";
-      item.menu.forEach(menuItem => {
-        const row = document.createElement("button");
-        row.className = "menu-row-card w-full text-left";
-        row.innerHTML = `
-          <div class="font-semibold text-2xl serif">${escapeHtml(menuItem.zh)}</div>
-          <div class="text-right text-2xl serif text-gray-700">${escapeHtml(menuItem.jp)}</div>
+      dates.forEach(date => {
+        const parts = formatDateParts(date);
+        const btn = document.createElement('button');
+        btn.className = 'date-item' + (date === selectedDate ? ' active' : '');
+        btn.innerHTML = `
+          <div class="dow">${parts.dow}</div>
+          <div class="dm">${parts.dm}</div>
+          <div class="dot"></div>
         `;
-        row.onclick = function() {
-          openLargeCard(menuItem.jp || menuItem.zh);
+        btn.onclick = function() {
+          selectedDate = date;
+          renderHome();
+          renderDateTabs();
+          renderItinerary();
         };
-        menuWrap.appendChild(row);
+        wrap.appendChild(btn);
       });
-    } else {
-      pointWrap.style.display = "none";
     }
 
-    document.getElementById("detail-edit-btn").onclick = function() {
-      closeSheets();
-      openEditSheet(getDocId(item));
-    };
-    document.getElementById("detail-delete-btn").onclick = function() {
-      closeSheets();
-      deleteItem(getDocId(item));
-    };
-
-    document.getElementById("overlay").classList.add("active");
-    document.getElementById("detail-sheet").classList.add("active");
-    document.getElementById("add-sheet").classList.remove("active");
-  }
-
-  function resetForm() {
-    document.getElementById("in-category").value = "spot";
-    document.getElementById("in-name").value = "";
-    document.getElementById("in-type").value = "";
-    document.getElementById("in-day").value = "";
-    document.getElementById("in-date").value = "";
-    document.getElementById("in-time").value = "";
-    document.getElementById("in-address").value = "";
-    document.getElementById("in-phone").value = "";
-    document.getElementById("in-image").value = "";
-    document.getElementById("in-note").value = "";
-    document.getElementById("in-menu").value = "";
-    toggleCategoryFields();
-  }
-
-  async function saveItem() {
-    const category = document.getElementById("in-category").value;
-    const name = document.getElementById("in-name").value.trim();
-    const typeInput = document.getElementById("in-type").value.trim();
-    const day = document.getElementById("in-day").value.trim() || "Plan";
-    const date = document.getElementById("in-date").value;
-    const time = document.getElementById("in-time").value;
-    const address = document.getElementById("in-address").value.trim();
-    const phone = document.getElementById("in-phone").value.trim();
-    const image = document.getElementById("in-image").value.trim() || fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
-    const note = document.getElementById("in-note").value.trim();
-    const menuText = document.getElementById("in-menu").value.trim();
-
-    if (!name) {
-      alert("請先輸入名稱");
-      return;
-    }
-    if (!date) {
-      alert("請選擇日期");
-      return;
+    function renderDateTabs() {
+      renderDateStripInto('date-tabs');
     }
 
-    let type = typeInput;
-    if (!type) {
-      if (category === "restaurant") type = "Food";
-      else if (category === "transport") type = "Transport";
-      else type = "Sightseeing";
+    function getCategoryClass(category) {
+      if (category === 'restaurant') return 'restaurant';
+      if (category === 'transport') return 'transport';
+      return 'spot';
     }
 
-    const desc = createInfoDesc(name, type, category, note);
-    const menu = category === "restaurant" ? parseMenuText(menuText) : [];
+    function renderHome() {
+      ensureSelectedDate();
+      renderDateStripInto('home-date-strip');
 
-    const payload = {
-      category,
-      name,
-      type,
-      day,
-      date,
-      time,
-      address,
-      phone,
-      image,
-      note,
-      desc,
-      menu,
-      mapQuery: address || name
-    };
+      const sameDay = itineraryItems
+        .filter(item => item.date === selectedDate)
+        .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
 
-    if (editingId) {
-      await updateDoc(doc(db, "itineraries", editingId), payload);
-    } else {
-      await addDoc(itineraryCol, payload);
-    }
+      const firstSpot = sameDay.find(x => x.category === 'spot') || sameDay[0];
+      const highlight = document.getElementById('home-highlight');
+      const preview = document.getElementById('home-preview-list');
 
-    editingId = null;
-    selectedDate = date;
-    resetForm();
-    closeSheets();
-    switchTab("plan");
-  }
+      if (!sameDay.length) {
+        highlight.innerHTML = `<div class="text-gray-500 text-sm">這一天還沒有行程，請直接在 app 裡新增。</div>`;
+        preview.innerHTML = '';
+        return;
+      }
 
-  async function deleteItem(id) {
-    const item = itineraryItems.find(x => getDocId(x) === id);
-    if (!item) return;
-
-    const ok = confirm(`要在 app 裡刪除「${item.name}」嗎？`);
-    if (!ok) return;
-
-    await deleteDoc(doc(db, "itineraries", id));
-  }
-
-  function openMap() {
-    if (!currentMapQuery) return;
-    const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(currentMapQuery);
-    window.open(url, "_blank");
-  }
-
-  function renderBudget() {
-    const list = document.getElementById("budget-list");
-    const rate = parseFloat(document.getElementById("rate-input").value) || 0;
-    list.innerHTML = "";
-
-    let totalJpy = 0;
-
-    budgetItems.forEach(item => {
-      totalJpy += Number(item.jpy);
-
-      const twd = Math.round(Number(item.jpy) * rate);
-      const row = document.createElement("div");
-      row.className = "budget-row";
-      row.innerHTML = `
-        <div class="flex-1">
-          <div class="font-semibold text-sm mb-1">${escapeHtml(item.name)}</div>
-          <div class="text-gray-500 text-xs mb-3">約 NT$ ${twd}</div>
-          <div class="flex flex-wrap gap-2">
-            <button class="mini-btn" data-action="edit">EDIT IN APP</button>
-            <button class="mini-btn delete" data-action="delete">DELETE IN APP</button>
-          </div>
+      highlight.innerHTML = `
+        <img src="${escapeHtml(firstSpot.image || fallbackImages[0])}" class="hero-image mb-4" alt="">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <div class="tag-badge">${escapeHtml(firstSpot.type || 'PLAN')}</div>
+          <div class="text-sm text-gray-500">${escapeHtml(firstSpot.address || '')}</div>
         </div>
-        <div class="serif text-lg">¥ ${Number(item.jpy).toLocaleString()}</div>
+        <div class="serif text-4xl leading-tight mb-2">${escapeHtml(firstSpot.name)}</div>
+        <div class="text-gray-600 text-sm leading-7">${escapeHtml(firstSpot.desc || '')}</div>
       `;
 
-      row.querySelector('[data-action="edit"]').onclick = function() {
-        editExpense(getDocId(item));
-      };
-      row.querySelector('[data-action="delete"]').onclick = function() {
-        deleteExpense(getDocId(item));
-      };
-
-      list.appendChild(row);
-    });
-
-    document.getElementById("budget-total-jpy").textContent = totalJpy.toLocaleString();
-    document.getElementById("budget-total-twd").textContent = Math.round(totalJpy * rate).toLocaleString();
-  }
-
-  async function saveExpense() {
-    const name = document.getElementById("expense-name").value.trim();
-    const jpy = Number(document.getElementById("expense-jpy").value);
-
-    if (!name || !jpy) {
-      alert("請輸入支出名稱與金額");
-      return;
+      preview.innerHTML = '';
+      sameDay.slice(0, 4).forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'budget-row';
+        row.innerHTML = `
+          <div>
+            <div class="serif text-3xl">${escapeHtml(item.time || '--:--')}</div>
+            <div class="eyebrow mt-2">${escapeHtml(item.type || '')}</div>
+          </div>
+          <div class="flex-1">
+            <div class="font-semibold text-lg mb-1">${escapeHtml(item.name)}</div>
+            <div class="text-gray-500 text-sm">${escapeHtml(item.address || '')}</div>
+          </div>
+        `;
+        preview.appendChild(row);
+      });
     }
 
-    const payload = { name, jpy };
+    function renderItinerary() {
+      const list = document.getElementById('itinerary-list');
+      list.innerHTML = '';
+      ensureSelectedDate();
 
-    if (editingBudgetId) {
-      await updateDoc(doc(db, "budgets", editingBudgetId), payload);
-    } else {
-      await addDoc(budgetCol, payload);
-    }
-
-    resetExpenseForm();
-  }
-
-  function editExpense(id) {
-    const item = budgetItems.find(x => getDocId(x) === id);
-    if (!item) return;
-
-    editingBudgetId = id;
-    document.getElementById("expense-name").value = item.name;
-    document.getElementById("expense-jpy").value = item.jpy;
-    document.getElementById("expense-submit-btn").textContent = "UPDATE EXPENSE";
-    document.getElementById("expense-cancel-btn").style.display = "inline-block";
-  }
-
-  async function deleteExpense(id) {
-    const item = budgetItems.find(x => getDocId(x) === id);
-    if (!item) return;
-
-    const ok = confirm(`要在 app 裡刪除「${item.name}」嗎？`);
-    if (!ok) return;
-
-    await deleteDoc(doc(db, "budgets", id));
-
-    if (editingBudgetId === id) {
-      resetExpenseForm();
-    }
-  }
-
-  function resetExpenseForm() {
-    editingBudgetId = null;
-    document.getElementById("expense-name").value = "";
-    document.getElementById("expense-jpy").value = "";
-    document.getElementById("expense-submit-btn").textContent = "ADD EXPENSE";
-    document.getElementById("expense-cancel-btn").style.display = "none";
-  }
-
-  async function seedIfNeeded() {
-    const itinerarySnap = await getDocs(itineraryCol);
-    if (itinerarySnap.empty) {
-      const oldLocal = JSON.parse(localStorage.getItem("maggie_trip_itinerary_v10") || "[]");
-      for (const item of oldLocal) {
-        const { id, ...payload } = item;
-        await addDoc(itineraryCol, payload);
+      if (!selectedDate) {
+        list.innerHTML = `
+          <div class="panel">
+            <div class="eyebrow mb-2">No Plan Yet</div>
+            <div class="text-gray-500 text-sm">目前沒有任何行程，請直接在 app 裡新增。</div>
+          </div>
+        `;
+        return;
       }
-    }
 
-    const budgetSnap = await getDocs(budgetCol);
-    if (budgetSnap.empty) {
-      const oldBudget = JSON.parse(localStorage.getItem("maggie_trip_budget_v10") || "null");
-      const source = Array.isArray(oldBudget) && oldBudget.length ? oldBudget : defaultBudgetItems;
-      for (const item of source) {
-        const { id, ...payload } = item;
-        await addDoc(budgetCol, payload);
+      const filtered = itineraryItems
+        .filter(item => item.date === selectedDate)
+        .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+
+      if (!filtered.length) {
+        list.innerHTML = `
+          <div class="panel">
+            <div class="eyebrow mb-2">No Plan Yet</div>
+            <div class="text-gray-500 text-sm">這一天還沒有任何行程，請直接在 app 裡新增。</div>
+          </div>
+        `;
+        return;
       }
-    }
-  }
 
-  function attachRealtimeListeners() {
-    onSnapshot(itineraryCol, snapshot => {
-      itineraryItems = snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      }));
+      filtered.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'timeline-row';
+        row.innerHTML = `
+          <div class="timeline-time">${escapeHtml(item.time || '--:--')}</div>
+          <div class="timeline-line"></div>
+          <div class="timeline-card ${getCategoryClass(item.category)}">
+            <div class="label">${escapeHtml(item.type || 'Plan')}</div>
+            <div class="serif text-3xl leading-tight mb-2">${escapeHtml(item.name)}</div>
+            <div class="text-gray-500 text-sm leading-7 mb-4">${escapeHtml(item.desc || '')}</div>
+            <div class="flex flex-wrap gap-2">
+              <button class="mini-btn" data-action="detail">DETAIL</button>
+              <button class="mini-btn" data-action="edit">EDIT IN APP</button>
+              <button class="mini-btn delete" data-action="delete">DELETE IN APP</button>
+            </div>
+          </div>
+        `;
+
+        row.querySelector('[data-action="detail"]').onclick = function() {
+          viewDetailByData(item);
+        };
+        row.querySelector('[data-action="edit"]').onclick = function() {
+          openEditSheet(item.id);
+        };
+        row.querySelector('[data-action="delete"]').onclick = function() {
+          deleteItem(item.id);
+        };
+
+        list.appendChild(row);
+      });
+    }
+
+    function viewDetailByData(item) {
+      currentDetailId = item.id;
+      currentMapQuery = item.address || item.mapQuery || item.name || '';
+
+      const badge = document.getElementById('detail-type-badge');
+      badge.textContent = (item.type || 'PLAN').toUpperCase();
+      badge.style.color = item.category === 'restaurant' ? '#B56F82' : item.category === 'transport' ? '#6C7FA6' : '#708D79';
+
+      document.getElementById('detail-time').textContent = item.time || '--:--';
+      document.getElementById('detail-title').textContent = item.name || '';
+      document.getElementById('detail-address').textContent = item.address || '未填寫地址';
+      document.getElementById('detail-phone').textContent = item.phone || '未填寫';
+      document.getElementById('detail-about').textContent = item.desc || '目前沒有說明，可直接在 app 裡編輯補上。';
+
+      const menuWrap = document.getElementById('detail-menu');
+      const pointWrap = document.getElementById('point-speak-wrap');
+      menuWrap.innerHTML = '';
+
+      if (item.category === 'restaurant' && item.menu && item.menu.length) {
+        pointWrap.style.display = 'block';
+        item.menu.forEach(menuItem => {
+          const row = document.createElement('button');
+          row.className = 'menu-row-card w-full text-left';
+          row.innerHTML = `
+            <div class="font-semibold text-2xl serif">${escapeHtml(menuItem.zh)}</div>
+            <div class="text-right text-2xl serif text-gray-700">${escapeHtml(menuItem.jp)}</div>
+          `;
+          row.onclick = function() {
+            openLargeCard(menuItem.jp || menuItem.zh);
+          };
+          menuWrap.appendChild(row);
+        });
+      } else {
+        pointWrap.style.display = 'none';
+      }
+
+      document.getElementById('detail-edit-btn').onclick = function() {
+        closeSheets();
+        openEditSheet(item.id);
+      };
+      document.getElementById('detail-delete-btn').onclick = function() {
+        closeSheets();
+        deleteItem(item.id);
+      };
+
+      document.getElementById('overlay').classList.add('active');
+      document.getElementById('detail-sheet').classList.add('active');
+      document.getElementById('add-sheet').classList.remove('active');
+    }
+
+    function resetForm() {
+      document.getElementById('in-category').value = 'spot';
+      document.getElementById('in-name').value = '';
+      document.getElementById('in-type').value = '';
+      document.getElementById('in-day').value = '';
+      document.getElementById('in-date').value = '';
+      document.getElementById('in-time').value = '';
+      document.getElementById('in-address').value = '';
+      document.getElementById('in-phone').value = '';
+      document.getElementById('in-image').value = '';
+      document.getElementById('in-note').value = '';
+      document.getElementById('in-menu').value = '';
+      toggleCategoryFields();
+    }
+
+    function saveItem() {
+      const category = document.getElementById('in-category').value;
+      const name = document.getElementById('in-name').value.trim();
+      const typeInput = document.getElementById('in-type').value.trim();
+      const day = document.getElementById('in-day').value.trim() || 'Plan';
+      const date = document.getElementById('in-date').value;
+      const time = document.getElementById('in-time').value;
+      const address = document.getElementById('in-address').value.trim();
+      const phone = document.getElementById('in-phone').value.trim();
+      const image = document.getElementById('in-image').value.trim() || fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+      const note = document.getElementById('in-note').value.trim();
+      const menuText = document.getElementById('in-menu').value.trim();
+
+      if (!name) {
+        alert('請先輸入名稱');
+        return;
+      }
+      if (!date) {
+        alert('請選擇日期');
+        return;
+      }
+
+      let type = typeInput;
+      if (!type) {
+        if (category === 'restaurant') type = 'Food';
+        else if (category === 'transport') type = 'Transport';
+        else type = 'Sightseeing';
+      }
+
+      const desc = createInfoDesc(name, type, category, note);
+      const menu = category === 'restaurant' ? parseMenuText(menuText) : [];
+
+      const newData = {
+        id: editingId || createId(),
+        category,
+        name,
+        type,
+        day,
+        date,
+        time,
+        address,
+        phone,
+        image,
+        note,
+        desc,
+        menu,
+        mapQuery: address || name
+      };
+
+      if (editingId) {
+        const idx = itineraryItems.findIndex(x => x.id === editingId);
+        if (idx !== -1) itineraryItems[idx] = newData;
+      } else {
+        itineraryItems.push(newData);
+      }
+
+      saveItinerary();
+      editingId = null;
+      selectedDate = date;
+      resetForm();
+      closeSheets();
       renderHome();
       renderDateTabs();
       renderItinerary();
-    });
+      switchTab('plan');
+    }
 
-    onSnapshot(budgetCol, snapshot => {
-      budgetItems = snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      }));
-      renderBudget();
-    });
-  }
+    function deleteItem(id) {
+      const item = itineraryItems.find(x => x.id === id);
+      if (!item) return;
+      const ok = confirm(`要在 app 裡刪除「${item.name}」嗎？`);
+      if (!ok) return;
 
-  function switchTab(tab) {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    document.getElementById("page-" + tab).classList.add("active");
-    document.querySelectorAll(".nav-link").forEach(n => n.classList.remove("active"));
-    document.getElementById("nav-" + tab).classList.add("active");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-    if (tab === "home") renderHome();
-    if (tab === "plan") {
+      itineraryItems = itineraryItems.filter(x => x.id !== id);
+      saveItinerary();
+      renderHome();
       renderDateTabs();
       renderItinerary();
     }
-    if (tab === "budget") renderBudget();
-  }
 
-  window.switchTab = switchTab;
-  window.toggleCategoryFields = toggleCategoryFields;
-  window.openAddSheet = openAddSheet;
-  window.closeSheets = closeSheets;
-  window.openMap = openMap;
-  window.closeLargeCard = closeLargeCard;
-  window.saveItem = saveItem;
-  window.saveExpense = saveExpense;
-  window.resetExpenseForm = resetExpenseForm;
+    function openMap() {
+      if (!currentMapQuery) return;
+      const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(currentMapQuery);
+      window.open(url, '_blank');
+    }
 
-  await seedIfNeeded();
-  attachRealtimeListeners();
-  toggleCategoryFields();
+    function renderBudget() {
+      const list = document.getElementById('budget-list');
+      const rate = parseFloat(document.getElementById('rate-input').value) || 0;
+      list.innerHTML = '';
 
-  console.log("Firebase connected and syncing");
-</script>
+      let totalJpy = 0;
+
+      budgetItems.forEach(item => {
+        totalJpy += Number(item.jpy);
+
+        const twd = Math.round(Number(item.jpy) * rate);
+        const row = document.createElement('div');
+        row.className = 'budget-row';
+        row.innerHTML = `
+          <div class="flex-1">
+            <div class="font-semibold text-sm mb-1">${escapeHtml(item.name)}</div>
+            <div class="text-gray-500 text-xs mb-3">約 NT$ ${twd}</div>
+            <div class="flex flex-wrap gap-2">
+              <button class="mini-btn" data-action="edit">EDIT IN APP</button>
+              <button class="mini-btn delete" data-action="delete">DELETE IN APP</button>
+            </div>
+          </div>
+          <div class="serif text-lg">¥ ${Number(item.jpy).toLocaleString()}</div>
+        `;
+
+        row.querySelector('[data-action="edit"]').onclick = function() {
+          editExpense(item.id);
+        };
+        row.querySelector('[data-action="delete"]').onclick = function() {
+          deleteExpense(item.id);
+        };
+
+        list.appendChild(row);
+      });
+
+      document.getElementById('budget-total-jpy').textContent = totalJpy.toLocaleString();
+      document.getElementById('budget-total-twd').textContent = Math.round(totalJpy * rate).toLocaleString();
+      saveBudget();
+    }
+
+    function saveExpense() {
+      const name = document.getElementById('expense-name').value.trim();
+      const jpy = Number(document.getElementById('expense-jpy').value);
+
+      if (!name || !jpy) {
+        alert('請輸入支出名稱與金額');
+        return;
+      }
+
+      if (editingBudgetId) {
+        const target = budgetItems.find(item => item.id === editingBudgetId);
+        if (!target) return;
+        target.name = name;
+        target.jpy = jpy;
+      } else {
+        budgetItems.unshift({
+          id: createId(),
+          name,
+          jpy
+        });
+      }
+
+      resetExpenseForm();
+      renderBudget();
+    }
+
+    function editExpense(id) {
+      const item = budgetItems.find(x => x.id === id);
+      if (!item) return;
+
+      editingBudgetId = id;
+      document.getElementById('expense-name').value = item.name;
+      document.getElementById('expense-jpy').value = item.jpy;
+      document.getElementById('expense-submit-btn').textContent = 'UPDATE EXPENSE';
+      document.getElementById('expense-cancel-btn').style.display = 'inline-block';
+    }
+
+    function deleteExpense(id) {
+      const item = budgetItems.find(x => x.id === id);
+      if (!item) return;
+
+      const ok = confirm(`要在 app 裡刪除「${item.name}」嗎？`);
+      if (!ok) return;
+
+      budgetItems = budgetItems.filter(x => x.id !== id);
+
+      if (editingBudgetId === id) resetExpenseForm();
+      renderBudget();
+    }
+
+    function resetExpenseForm() {
+      editingBudgetId = null;
+      document.getElementById('expense-name').value = '';
+      document.getElementById('expense-jpy').value = '';
+      document.getElementById('expense-submit-btn').textContent = 'ADD EXPENSE';
+      document.getElementById('expense-cancel-btn').style.display = 'none';
+    }
+
+    renderHome();
+    renderDateTabs();
+    renderItinerary();
+    renderBudget();
+    toggleCategoryFields();
+  </script>
 </body>
 </html>
