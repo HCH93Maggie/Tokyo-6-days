@@ -3,82 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TOKYO DIARY AI</title>
+    <title>東京 · 紙誌 · AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { serif: ['Noto Serif TC', 'serif'], sans: ['system-ui', 'sans-serif'] } } }
+        }
+    </script>
     <style>
-        /* 強制紙質感底色 */
         body { 
-            background: #F4F1EA !important; 
-            color: #2C2C2C; 
-            font-family: sans-serif;
-            margin: 0; padding: 0;
+            background-color: #F4F1EA;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            color: #2C2C2C;
+            -webkit-tap-highlight-color: transparent;
         }
-        .serif { font-family: 'Noto Serif TC', serif; }
-        .card { background: white; border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; }
-        /* 彈窗：預設隱藏 */
-        #myModal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: #F4F1EA; z-index: 9999; 
-            overflow-y: auto; padding: 40px 20px;
+        .serif-title { font-family: 'Noto Serif TC', serif; }
+        .paper-card { 
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
         }
+        .nav-text { font-size: 11px; letter-spacing: 0.2em; color: #A0A0A0; font-weight: bold; }
+        .nav-text.active { color: #2C2C2C; border-bottom: 2px solid #2C2C2C; }
+        
+        /* 彈窗樣式 */
+        #detail-modal { display: none; position: fixed; inset: 0; background: rgba(244, 241, 234, 0.98); z-index: 1000; overflow-y: auto; }
+        #detail-modal.active { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body class="pb-10 font-sans">
 
-    <div style="display: flex; justify-content: space-between; padding: 30px 20px;">
-        <div class="serif" style="font-size: 20px; font-weight: 900;">TOKYO JOURNAL</div>
-        <button onclick="openAdd()" style="background: #000; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">+ ADD SPOT</button>
-    </div>
+    <nav class="flex justify-between items-center px-8 py-8 sticky top-0 z-50 bg-[#F4F1EA]/90 backdrop-blur-sm">
+        <div class="nav-text active">JOURNAL</div>
+        <button onclick="document.getElementById('add-modal').classList.add('active')" class="text-xs font-bold bg-zinc-900 text-white px-4 py-2 rounded-full tracking-widest">+ ADD</button>
+    </nav>
 
-    <div id="list" style="padding: 0 20px;">
-        <div class="card" style="margin-bottom: 30px;" onclick="viewDetail('敘敘苑燒肉', '新宿高空絕美燒肉，必點牛舌。', '上等牛舌 / 上タン, 壺漬小排 / 壺漬け')">
-            <img src="https://images.unsplash.com/photo-1590759668628-05b0fc34b139?w=800" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
-            <div style="padding: 20px;">
-                <div style="font-size: 10px; color: #999; letter-spacing: 2px;">DINING</div>
-                <div class="serif" style="font-size: 24px; margin-top: 5px;">敘敘苑燒肉</div>
+    <main class="px-6 space-y-10" id="itinerary-list">
+        <header class="text-center py-6">
+            <p class="text-[9px] tracking-[0.4em] text-gray-400 mb-2 uppercase">Tokyo Selection</p>
+            <h1 class="serif-title text-3xl font-black italic">探索地圖</h1>
+        </header>
+
+        <article class="paper-card overflow-hidden" onclick="showDetail('敘敘苑燒肉', '這是在新宿高樓雲端品嚐的極致燒肉。', 'https://images.unsplash.com/photo-1590759668628-05b0fc34b139', ['上等牛舌 / 上タン塩', '壺漬韓式小排 / 壺漬カルビ', '敘敘苑沙拉 / 叙々苑サラダ'])">
+            <div class="aspect-[4/5] relative">
+                <img src="https://images.unsplash.com/photo-1590759668628-05b0fc34b139?q=80&w=800" class="w-full h-full object-cover grayscale-[20%]">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
+                    <span class="text-[10px] text-white/70 tracking-widest uppercase font-bold mb-1 border-l-2 border-red-500 pl-2">Dining / Day 1</span>
+                    <h2 class="serif-title text-2xl text-white">敘敘苑燒肉 新宿店</h2>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <div id="detail-modal">
+        <div class="px-8 pt-16 pb-20">
+            <button onclick="document.getElementById('detail-modal').classList.remove('active')" class="mb-10 text-gray-400"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            
+            <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-2 uppercase">AI Generated Guide</p>
+            <h2 id="modal-title" class="serif-title text-4xl mb-6"></h2>
+            
+            <div class="h-[1px] bg-gray-200 w-full mb-8"></div>
+            
+            <section class="mb-12 text-sm leading-relaxed text-gray-600 italic">
+                <p id="modal-desc"></p>
+            </section>
+
+            <section>
+                <p class="text-[11px] font-bold text-gray-400 tracking-wider mb-6 uppercase">精選推薦菜單 (MENU)</p>
+                <div id="modal-menu" class="space-y-4">
+                    </div>
+            </section>
+
+            <div class="mt-16">
+                <button class="w-full py-5 bg-zinc-900 text-white text-xs font-bold tracking-[0.2em] rounded-sm">📍 OPEN GOOGLE MAPS</button>
             </div>
         </div>
     </div>
 
-    <div id="myModal">
-        <button onclick="closeModal()" style="font-size: 30px; border: none; background: none; margin-bottom: 20px;">×</button>
-        <h1 id="m-title" class="serif" style="font-size: 40px; margin-bottom: 20px;"></h1>
-        <p id="m-desc" style="font-style: italic; color: #666; line-height: 1.8; margin-bottom: 30px;"></p>
-        <div style="font-size: 12px; color: #999; margin-bottom: 15px; font-weight: bold;">AI RECOMMENDED MENU</div>
-        <div id="m-menu" style="border-top: 1px solid #ddd;"></div>
-    </div>
-
-    <div id="addModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:10000; padding: 60px 40px;">
-        <h2 class="serif" style="font-size: 30px;">要去哪裡？</h2>
-        <input type="text" id="inp-name" placeholder="輸入地名..." style="width:100%; border:none; border-bottom:2px solid #000; padding: 20px 0; font-size: 20px; outline:none; margin-top: 40px;">
-        <div style="margin-top: 50px; display: flex; gap: 10px;">
-            <button onclick="doAiGen()" style="flex:2; background:#000; color:#fff; padding: 20px; font-weight:bold;">AI GENERATE</button>
-            <button onclick="closeAdd()" style="flex:1; border:1px solid #000; padding: 20px;">BACK</button>
+    <div id="add-modal" class="fixed inset-0 bg-white/95 z-[2000] hidden items-center justify-center p-10">
+        <div class="w-full">
+            <h3 class="serif-title text-3xl mb-10">新增行程目的地</h3>
+            <input type="text" id="place-name" placeholder="景點名稱（如：淺草寺）" class="w-full border-b border-gray-300 py-4 outline-none text-xl serif-title bg-transparent">
+            <div class="flex gap-4 mt-12">
+                <button onclick="aiGenerate()" class="flex-1 py-4 bg-zinc-900 text-white text-xs font-bold tracking-widest">GENERATE</button>
+                <button onclick="document.getElementById('add-modal').classList.remove('active')" class="flex-1 py-4 border border-zinc-900 text-xs font-bold tracking-widest">BACK</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 1. 開啟詳情
-        function viewDetail(title, desc, menuStr) {
-            document.getElementById('m-title').innerText = title;
-            document.getElementById('m-desc').innerText = desc;
-            
-            const menuArr = menuStr.split(',');
-            let html = '';
-            menuArr.forEach(m => {
-                html += `<div style="padding: 15px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 14px;">${m}</div>`;
+        // 顯示細節的功能
+        function showDetail(title, desc, img, menu) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            const menuDiv = document.getElementById('modal-menu');
+            menuDiv.innerHTML = '';
+            menu.forEach(item => {
+                const parts = item.split('/');
+                menuDiv.innerHTML += `
+                    <div class="flex justify-between items-center py-4 border-b border-gray-100">
+                        <span class="text-sm font-bold text-gray-800">${parts[0]}</span>
+                        <span class="text-xs text-gray-400 serif-title">${parts[1] || ''}</span>
+                    </div>`;
             });
-            document.getElementById('m-menu').innerHTML = html;
-            document.getElementById('myModal').style.display = 'block';
+            document.getElementById('detail-modal').classList.add('active');
         }
 
-        // 2. 關閉詳情
-        function closeModal() {
-            document.getElementById('myModal').style.display = 'none';
-        }
+        // AI 生成邏輯
+        function aiGenerate() {
+            const name = document.getElementById('place-name').value;
+            if(!name) return;
+            
+            // 這裡模擬 AI 根據地名生成的內容
+            const aiDesc = `「${name}」是東京旅行中不可多得的靈魂棲息地。這裡融合了江戶時代的歷史厚度與現代東京的精緻美學，建議在微雨或清晨時分緩步探索。`;
+            const aiMenu = [`${name} 特製套餐 / 限定メニュー`, '在地職人手作 / 職人手作り', '季節限定飲品 / 季節の飲み物'];
+            const randomImg = `https://images.unsplash.com/photo-1540959733332-e94e270b4d82?q=80&w=800&auto=format`;
 
-        // 3. 開啟新增
-        function openAdd
+            const list = document.getElementById('itinerary-list');
+            const newCard = document.createElement('article');
+            newCard.className = "paper-card overflow-hidden mt-10";
+            newCard.onclick = () => showDetail(name, aiDesc, randomImg, aiMenu);
+            newCard.innerHTML = `
+                <div class="aspect-[4/5] relative">
+                    <img src="${randomImg}" class="w-full h-full object-cover grayscale-[20%]">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
+                        <span class="text-[10px] text-white/70 tracking-widest uppercase font-bold mb-1 border-l-2 border-orange-500 pl-2">AI DISCOVERY</span>
+                        <h2 class="serif-title text-2xl text-white">${name}</h2>
+                    </div>
+                </div>`;
+            
+            list.appendChild(newCard);
+            document.getElementById('add-modal').classList.remove('active');
+            document.getElementById('place-name').value = '';
+            
+            // 直接彈出剛剛生成的介紹！
+            setTimeout(() => showDetail(name, aiDesc, randomImg, aiMenu), 500);
+        }
+    </script>
+</body>
+</html>
