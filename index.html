@@ -1094,5 +1094,48 @@
     renderBudget();
     toggleCategoryFields();
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    setDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrbG3xh3PhlgSYdNQbVuH_e37HsCNTxfU",
+    authDomain: "tokyo-6-days.firebaseapp.com",
+    projectId: "tokyo-6-days",
+    storageBucket: "tokyo-6-days.firebasestorage.app",
+    messagingSenderId: "105321880680",
+    appId: "1:105321880680:web:4b7b10cefcfc5ef6f8efdd",
+    measurementId: "G-G4RBQTDN3R"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  window.firebaseDb = db;
+  window.firebaseFns = {
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    setDoc,
+    getDoc
+  };
+
+  console.log("Firebase connected");
+</script>
 </body>
 </html>
