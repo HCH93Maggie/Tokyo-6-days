@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>東京 · 紙誌 · AI</title>
+    <title>東京 · 紙誌 · AI 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -18,84 +18,104 @@
             background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
             color: #2C2C2C;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         .serif-title { font-family: 'Noto Serif TC', serif; }
         .paper-card { 
             background: white;
-            border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            border-radius: 2px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
-        .nav-text { font-size: 11px; letter-spacing: 0.2em; color: #A0A0A0; font-weight: bold; }
-        .nav-text.active { color: #2C2C2C; border-bottom: 2px solid #2C2C2C; }
+        .paper-card:active { transform: scale(0.98); }
         
-        /* 彈窗樣式 */
-        #detail-modal { display: none; position: fixed; inset: 0; background: rgba(244, 241, 234, 0.98); z-index: 1000; overflow-y: auto; }
-        #detail-modal.active { display: block; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        /* 頁面與彈窗控制 */
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: #F4F1EA; 
+            z-index: 1000; 
+            overflow-y: auto;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        #modal-overlay.active { display: block; }
+
+        .add-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.98);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-panel.active { display: flex; }
     </style>
 </head>
 <body class="pb-10 font-sans">
 
-    <nav class="flex justify-between items-center px-8 py-8 sticky top-0 z-50 bg-[#F4F1EA]/90 backdrop-blur-sm">
-        <div class="nav-text active">JOURNAL</div>
-        <button onclick="document.getElementById('add-modal').classList.add('active')" class="text-xs font-bold bg-zinc-900 text-white px-4 py-2 rounded-full tracking-widest">+ ADD</button>
+    <nav class="flex justify-between items-center px-8 py-8 sticky top-0 z-50 bg-[#F4F1EA]/90 backdrop-blur-md border-b border-black/5">
+        <button onclick="showPage('main')" class="text-[10px] tracking-[0.3em] font-bold text-zinc-400 focus:text-black">JOURNAL</button>
+        <button onclick="toggleAdd(true)" class="text-[10px] tracking-[0.3em] font-bold text-orange-700">+ NEW SPOT</button>
+        <button onclick="showPage('budget')" class="text-[10px] tracking-[0.3em] font-bold text-zinc-400 focus:text-black">BUDGET</button>
     </nav>
 
-    <main class="px-6 space-y-10" id="itinerary-list">
-        <header class="text-center py-6">
-            <p class="text-[9px] tracking-[0.4em] text-gray-400 mb-2 uppercase">Tokyo Selection</p>
-            <h1 class="serif-title text-3xl font-black italic">探索地圖</h1>
+    <main id="page-main" class="page-content active px-6 space-y-12">
+        <header class="text-center py-10">
+            <p class="text-[9px] tracking-[0.4em] text-gray-400 mb-2 uppercase">Spring 2026</p>
+            <h1 class="serif-title text-4xl font-black italic">東京考察清單</h1>
         </header>
 
-        <article class="paper-card overflow-hidden" onclick="showDetail('敘敘苑燒肉', '這是在新宿高樓雲端品嚐的極致燒肉。', 'https://images.unsplash.com/photo-1590759668628-05b0fc34b139', ['上等牛舌 / 上タン塩', '壺漬韓式小排 / 壺漬カルビ', '敘敘苑沙拉 / 叙々苑サラダ'])">
-            <div class="aspect-[4/5] relative">
-                <img src="https://images.unsplash.com/photo-1590759668628-05b0fc34b139?q=80&w=800" class="w-full h-full object-cover grayscale-[20%]">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6">
-                    <span class="text-[10px] text-white/70 tracking-widest uppercase font-bold mb-1 border-l-2 border-red-500 pl-2">Dining / Day 1</span>
-                    <h2 class="serif-title text-2xl text-white">敘敘苑燒肉 新宿店</h2>
+        <div id="itinerary-container" class="space-y-10">
+            <div class="paper-card overflow-hidden" onclick="openDetail('敘敘苑燒肉', '這是在新宿高樓雲端品嚐的極致燒肉。著名的牛舌配上秘製醬汁，是來到東京的第一站。', 'https://images.unsplash.com/photo-1590759668628-05b0fc34b139', ['上等牛舌 / 上タン塩', '壺漬韓式小排 / 壺漬カルビ', '敘敘苑沙拉 / 叙々苑サラダ'])">
+                <div class="aspect-[4/5] relative">
+                    <img src="https://images.unsplash.com/photo-1590759668628-05b0fc34b139?q=80&w=800" class="w-full h-full object-cover grayscale-[20%]">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent p-8 flex flex-col justify-end">
+                        <span class="text-[10px] text-white/60 tracking-widest font-bold mb-2">DINING · SHINJUKU</span>
+                        <h2 class="serif-title text-3xl text-white">敘敘苑燒肉</h2>
+                    </div>
                 </div>
             </div>
-        </article>
+        </div>
     </main>
 
-    <div id="detail-modal">
-        <div class="px-8 pt-16 pb-20">
-            <button onclick="document.getElementById('detail-modal').classList.remove('active')" class="mb-10 text-gray-400"><i class="fa-solid fa-xmark text-2xl"></i></button>
+    <main id="page-budget" class="page-content px-8 pt-10 text-center">
+        <h2 class="serif-title text-4xl mb-12 italic">旅費計算</h2>
+        <div class="p-10 border border-black/10 rounded-sm">
+            <p class="text-[10px] tracking-widest text-gray-400 mb-4 uppercase">Total Expense</p>
+            <p id="total-cost" class="serif-title text-5xl tracking-tighter">¥ 0</p>
+        </div>
+    </main>
+
+    <div id="modal-overlay">
+        <div class="px-8 pt-16 pb-24">
+            <button onclick="closeDetail()" class="mb-12 text-zinc-300 hover:text-black transition-colors"><i class="fa-solid fa-arrow-left text-2xl"></i></button>
             
-            <p class="text-[10px] tracking-[0.3em] text-gray-400 mb-2 uppercase">AI Generated Guide</p>
-            <h2 id="modal-title" class="serif-title text-4xl mb-6"></h2>
+            <p id="modal-tag" class="text-[10px] tracking-[0.4em] text-gray-400 mb-2 uppercase">Selection</p>
+            <h2 id="modal-title" class="serif-title text-5xl mb-10 leading-tight"></h2>
             
-            <div class="h-[1px] bg-gray-200 w-full mb-8"></div>
-            
-            <section class="mb-12 text-sm leading-relaxed text-gray-600 italic">
-                <p id="modal-desc"></p>
+            <section class="mb-16 border-l-2 border-black/5 pl-6">
+                <p id="modal-desc" class="text-sm leading-relaxed text-gray-500 italic"></p>
             </section>
 
             <section>
-                <p class="text-[11px] font-bold text-gray-400 tracking-wider mb-6 uppercase">精選推薦菜單 (MENU)</p>
-                <div id="modal-menu" class="space-y-4">
+                <p class="text-[10px] font-bold text-gray-400 tracking-[0.3em] mb-8 uppercase">AI Generated Menu</p>
+                <div id="modal-menu" class="space-y-6">
                     </div>
             </section>
-
-            <div class="mt-16">
-                <button class="w-full py-5 bg-zinc-900 text-white text-xs font-bold tracking-[0.2em] rounded-sm">📍 OPEN GOOGLE MAPS</button>
-            </div>
+            
+            <button class="mt-20 w-full py-5 border border-black text-[10px] font-bold tracking-[0.3em] uppercase">Open Google Maps</button>
         </div>
     </div>
 
-    <div id="add-modal" class="fixed inset-0 bg-white/95 z-[2000] hidden items-center justify-center p-10">
-        <div class="w-full">
-            <h3 class="serif-title text-3xl mb-10">新增行程目的地</h3>
-            <input type="text" id="place-name" placeholder="景點名稱（如：淺草寺）" class="w-full border-b border-gray-300 py-4 outline-none text-xl serif-title bg-transparent">
-            <div class="flex gap-4 mt-12">
-                <button onclick="aiGenerate()" class="flex-1 py-4 bg-zinc-900 text-white text-xs font-bold tracking-widest">GENERATE</button>
-                <button onclick="document.getElementById('add-modal').classList.remove('active')" class="flex-1 py-4 border border-zinc-900 text-xs font-bold tracking-widest">BACK</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 顯示細節的功能
-        function showDetail(title, desc, img, menu) {
-            document.getElementById('modal-
+    <div id="add-panel" class="add-panel">
+        <div class="w-full px-10">
+            <h2 class="serif-title text-4xl mb-12 italic">新增目的地</h2>
+            <input type="text" id="input-place" placeholder="輸入地點或餐廳..." class="w-full bg-transparent border-b-2 border-zinc-900 py-4 text-2xl outline-none serif-title">
+            <div class="flex gap
