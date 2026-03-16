@@ -910,7 +910,7 @@
 
     function viewDetailByData(item) {
       currentDetailId = item.id;
-      currentMapQuery = item.mapQuery || item.name || '';
+      currentMapQuery = item.address || item.mapQuery || item.name || '';
 
       const badge = document.getElementById('detail-type-badge');
       badge.textContent = (item.type || 'PLAN').toUpperCase();
